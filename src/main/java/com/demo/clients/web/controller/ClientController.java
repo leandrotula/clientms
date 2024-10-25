@@ -1,14 +1,10 @@
 package com.demo.clients.web.controller;
 
 import com.demo.clients.service.ClientService;
-import com.demo.clients.web.model.ClientDetailedResponse;
-import com.demo.clients.web.model.ClientRequestBody;
-import com.demo.clients.web.model.ClientResponseBody;
-import com.demo.clients.web.model.KpiClientResponse;
+import com.demo.clients.web.model.*;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +30,7 @@ public class ClientController {
 
     @GetMapping
     @Operation(summary = "Retrieve all clients plus probable death date", description = "All client info plus possibly death date")
-    public Page<ClientDetailedResponse> getAllClients(
+    public PageDtoResponse<ClientDetailedResponse> getAllClients(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return clientService.getAllClients(page, size);

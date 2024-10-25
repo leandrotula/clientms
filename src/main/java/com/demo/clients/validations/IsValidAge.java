@@ -8,8 +8,6 @@ import java.time.LocalDate;
 
 public class IsValidAge implements ConstraintValidator<ValidAge, LocalDate> {
 
-    private static final int MAX_YEARS_AGO = 18;
-
     @Override
     public void initialize(ValidAge constraintAnnotation) {
     }
@@ -20,6 +18,7 @@ public class IsValidAge implements ConstraintValidator<ValidAge, LocalDate> {
             return true;
         }
         LocalDate now = LocalDate.now();
-        return !date.isAfter(now.minusYears(MAX_YEARS_AGO));
+        return !date.isAfter(now);
+
     }
 }
