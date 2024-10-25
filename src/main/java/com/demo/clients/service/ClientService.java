@@ -4,10 +4,7 @@ import com.demo.clients.data.entity.ClientEntity;
 import com.demo.clients.data.repository.AgeStatisticsDTO;
 import com.demo.clients.data.repository.ClientRepository;
 import com.demo.clients.exception.ClientAlreadyExistsException;
-import com.demo.clients.web.model.ClientDetailedResponse;
-import com.demo.clients.web.model.ClientRequestBody;
-import com.demo.clients.web.model.ClientResponseBody;
-import com.demo.clients.web.model.KpiClientResponse;
+import com.demo.clients.web.model.*;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,13 +17,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ClientService {
 
-    private static final int AVERAGE_LIFE_EXPECTANCY = 80;
-
-
     private final ClientRepository clientRepository;
+    private final ClientCalculation clientCalculation;
 
     @Transactional
     public ClientResponseBody create(ClientRequestBody clientRequestBody) {
+        clientCalculation.validateInputData(clientRequestBody.getAge(), clientRequestBody.getBirthdate());
         long quantity = clientRepository
                 .countClientEntitiesByNameIgnoreCaseAndAgeAndLastNameIgnoreCaseAndBirthdate(
                 clientRequestBody.getName(),
@@ -47,24 +43,21 @@ public class ClientService {
         return new KpiClientResponse(result.getAvgAge(), result.getStddevAge());
     }
 
-    public Page<ClientDetailedResponse> getAllClients(int page, int size) {
+    public PageDtoResponse<ClientDetailedResponse> getAllClients(int page, int size) {
         Page<ClientEntity> clientEntityPage = clientRepository.findAll(PageRequest.of(page, size));
-        return clientEntityPage.map(this::toClientWithProbableDeathDTO);
+        Page<ClientDetailedResponse> map = clientEntityPage.map(this::toClientWithProbableDeathDTO);
+        return new PageDtoResponse<>(map);
     }
 
     private ClientDetailedResponse toClientWithProbableDeathDTO(ClientEntity client) {
-        LocalDate probableDeathDate = calculateProbableDeathDate(client.getBirthdate());
+        LocalDate probableDeathDate = clientCalculation.calculateProbableDeathDate(client.getBirthdate());
         return new ClientDetailedResponse(
                 client.getId(),
                 client.getName(),
                 client.getAge(),
                 client.getBirthdate(),
-                probableDeathDate
+                probableDeathDate,
+                client.getLastName()
         );
     }
-
-    private LocalDate calculateProbableDeathDate(LocalDate birthDate) {
-        return birthDate.plusYears(AVERAGE_LIFE_EXPECTANCY);
-    }
-
 }

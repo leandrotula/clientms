@@ -17,4 +17,5 @@ public class ClientDetailedResponse {
     private Integer age;
     private LocalDate birthDate;
     private LocalDate probableDeathDate;
+    private String lastName;
 }
